@@ -1,7 +1,6 @@
 use crate::types::{Monitor, Status, User, UserStatus, Wrapper};
 
 use std::collections::HashMap;
-use std::error::Error;
 use std::time::{SystemTime, UNIX_EPOCH};
 
 use reqwest::{Client, Response};
@@ -30,7 +29,7 @@ impl Connection {
         &self,
         endpoint: &str,
         query: &T,
-    ) -> Result<Response, Box<dyn Error>> {
+    ) -> Result<Response, reqwest::Error> {
         let response = self
             .client
             .get(self.server.clone() + endpoint)
@@ -48,7 +47,7 @@ impl Connection {
         &self,
         endpoint: &str,
         data: T,
-    ) -> Result<Response, Box<dyn Error>> {
+    ) -> Result<Response, reqwest::Error> {
         let response = self
             .client
             .post(self.server.clone() + endpoint)
@@ -63,7 +62,7 @@ impl Connection {
         Ok(response)
     }
 
-    pub async fn pull_static(&self) -> Result<(UserMap, StatusMap), Box<dyn Error>> {
+    pub async fn pull_static(&self) -> Result<(UserMap, StatusMap), reqwest::Error> {
         #[derive(Debug, Deserialize)]
         struct Cluster {
             consumer: HashMap<String, User>,
@@ -77,7 +76,10 @@ impl Connection {
 
         let time_now = format!(
             "{}",
-            SystemTime::now().duration_since(UNIX_EPOCH)?.as_secs()
+            SystemTime::now()
+                .duration_since(UNIX_EPOCH)
+                .expect("System time is before 1970")
+                .as_secs()
         );
 
         let query = [
@@ -99,7 +101,7 @@ impl Connection {
         ))
     }
 
-    pub async fn pull_mutable(&self) -> Result<(Monitor, UserStatus), Box<dyn Error>> {
+    pub async fn pull_mutable(&self) -> Result<(Monitor, UserStatus), reqwest::Error> {
         #[derive(Debug, Deserialize)]
         struct PullData {
             monitor: Monitor,
@@ -108,7 +110,10 @@ impl Connection {
 
         let time_now = format!(
             "{}",
-            SystemTime::now().duration_since(UNIX_EPOCH)?.as_secs()
+            SystemTime::now()
+                .duration_since(UNIX_EPOCH)
+                .expect("System time is before 1970")
+                .as_secs()
         );
 
         let query = [
@@ -126,7 +131,7 @@ impl Connection {
         Ok((pull_data.data.monitor, pull_data.data.status))
     }
 
-    pub async fn set_status(&self, data: UserStatus) -> Result<(), Box<dyn Error>> {
+    pub async fn set_status(&self, data: UserStatus) -> Result<(), reqwest::Error> {
         #[derive(Serialize)]
         struct Wrapper {
             #[serde(rename = "Status")]
@@ -135,7 +140,7 @@ impl Connection {
 
         let wrapper = Wrapper { status: data };
 
-        let body = serde_json::to_string(&wrapper)?;
+        let body = serde_json::to_string(&wrapper).unwrap();
         self.make_post_request("/api/v2/statusgeber/set-status", body)
             .await?;
         Ok(())

@@ -1,12 +1,12 @@
 use std::collections::HashMap;
 use std::path::PathBuf;
 
-use clap::Parser;
 use clap::ArgGroup;
+use clap::Parser;
 use derive_getters::Getters;
 use serde::{Deserialize, Serialize};
 
-#[derive(Parser)]
+#[derive(Parser, Getters)]
 #[command(author, version, about, long_about = None)]
 #[command(group(ArgGroup::new("token_input").required(true).args(["token", "token_file"])))]
 pub struct Arguments {
