@@ -1,4 +1,4 @@
-use divera_status::{get_token, run, Arguments};
+use divera_status::{run, Arguments};
 
 use clap::Parser;
 
@@ -6,8 +6,7 @@ use clap::Parser;
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let args = Arguments::parse();
 
-    let token = get_token(&args)?;
-
+    let token = args.get_token()?;
     run(args, token).await?;
 
     Ok(())

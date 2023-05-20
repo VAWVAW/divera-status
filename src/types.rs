@@ -1,10 +1,11 @@
-use std::collections::HashMap;
+use std::fs::File;
+use std::io;
+use std::io::BufRead;
 use std::path::PathBuf;
 
 use clap::ArgGroup;
 use clap::Parser;
 use derive_getters::Getters;
-use serde::{Deserialize, Serialize};
 
 #[derive(Parser, Getters)]
 #[command(author, version, about, long_about = None)]
@@ -25,64 +26,37 @@ pub struct Arguments {
     /// divera instance to use
     #[arg(long, default_value = "https://app.divera247.com")]
     pub(crate) server: String,
+
+
+    /// debug output
+    #[arg(short, long)]
+    pub(crate) debug: bool,
 }
 
-#[derive(Debug, Serialize, Deserialize, Getters, Clone)]
-pub struct ClickEvent {
-    button: u32,
-}
-
-#[derive(Debug, Serialize, Deserialize, Clone)]
-pub struct Wrapper<T> {
-    pub data: T,
-}
-
-#[derive(Debug, Serialize, Deserialize, Getters, Clone)]
-pub struct User {
-    #[serde(rename = "stdformat_name")]
-    name: String,
-}
-
-#[derive(Debug, Serialize, Deserialize, Getters, Clone)]
-pub struct Status {
-    name: String,
-    color_hex: String,
-}
-
-#[derive(Debug, Serialize, Deserialize, Getters, Clone)]
-pub struct BasicMonitorStatus {
-    #[serde(rename = "all")]
-    count: u32,
-}
-
-#[derive(Debug, Serialize, Deserialize, Getters, Clone)]
-pub struct MonitorUser {
-    id: u32,
-}
-
-#[derive(Debug, Serialize, Deserialize, Getters, Clone)]
-pub struct MonitorStatus {
-    #[serde(rename = "all")]
-    users: Vec<MonitorUser>,
-}
-
-#[derive(Debug, Serialize, Deserialize, Getters, Clone)]
-pub struct Monitor {
-    #[serde(rename = "1")]
-    basic: HashMap<String, BasicMonitorStatus>,
-
-    #[serde(rename = "2")]
-    complex: HashMap<String, MonitorStatus>,
-}
-
-#[derive(Debug, Serialize, Deserialize, Getters, Clone)]
-pub struct UserStatus {
-    #[serde(rename(serialize = "id"))]
-    status_id: u32,
-}
-
-impl UserStatus {
-    pub fn new(status_id: u32) -> Self {
-        Self { status_id }
+impl Arguments {
+    pub fn get_token(&self) -> Result<String, io::Error> {
+        let token: String = if let Some(token) = &self.token {
+            token.clone()
+        } else {
+            let mut buffer = String::new();
+            let file = File::open(
+                self.token_file
+                    .as_ref()
+                    .expect("neither token or token-file provided"),
+            )?;
+            let _ = io::BufReader::new(file).read_line(&mut buffer)?;
+            buffer.pop();
+            buffer
+        };
+        Ok(token)
     }
+}
+
+#[non_exhaustive]
+#[allow(unused)]
+#[derive(Debug, PartialEq)]
+pub enum Update {
+    Reload,
+    StatusNext,
+    StatusPrev,
 }

@@ -1,4 +1,4 @@
-use crate::types::{Monitor, Status, User, UserStatus, Wrapper};
+use crate::api_types::{Monitor, Status, User, UserStatus, Wrapper};
 
 use std::collections::HashMap;
 use std::time::{SystemTime, UNIX_EPOCH};
@@ -14,14 +14,16 @@ pub struct Connection {
     client: Client,
     server: String,
     token: String,
+    debug: bool
 }
 
 impl Connection {
-    pub fn new(client: Client, server: String, token: String) -> Self {
+    pub fn new(client: Client, server: String, token: String, debug: bool) -> Self {
         Connection {
             client,
             server,
             token,
+            debug,
         }
     }
 
@@ -74,6 +76,10 @@ impl Connection {
             cluster: Cluster,
         }
 
+        if self.debug {
+            println!("debug: pulling static data");
+        }
+
         let time_now = format!(
             "{}",
             SystemTime::now()
@@ -95,6 +101,10 @@ impl Connection {
         let response = self.make_get_request("/api/v2/pull/all", &query).await?;
         let pull_data: Wrapper<PullData> = response.json().await?;
 
+        if self.debug {
+            println!("debug: got pull data: {:?}", pull_data);
+        }
+
         Ok((
             pull_data.data.cluster.consumer,
             pull_data.data.cluster.status,
@@ -106,6 +116,10 @@ impl Connection {
         struct PullData {
             monitor: Monitor,
             status: UserStatus,
+        }
+
+        if self.debug {
+            println!("debug: pulling mutable data");
         }
 
         let time_now = format!(
@@ -128,6 +142,10 @@ impl Connection {
         let response = self.make_get_request("/api/v2/pull/all", &query).await?;
         let pull_data: Wrapper<PullData> = response.json().await?;
 
+        if self.debug {
+            println!("debug: got pull data: {:?}", pull_data);
+        }
+
         Ok((pull_data.data.monitor, pull_data.data.status))
     }
 
@@ -138,11 +156,19 @@ impl Connection {
             status: UserStatus,
         }
 
+        if self.debug {
+            println!("debug: setting status to: {}", data.status_id());
+        }
+
         let wrapper = Wrapper { status: data };
 
         let body = serde_json::to_string(&wrapper).unwrap();
         self.make_post_request("/api/v2/statusgeber/set-status", body)
             .await?;
         Ok(())
+    }
+
+    pub async fn set_status_id(&self, id: u32) -> Result<(), reqwest::Error> {
+        self.set_status(UserStatus::new(id)).await
     }
 }

@@ -1,9 +1,21 @@
 [package]
 name = "divera-status"
-version = "0.1.1"
+version = "0.2.0"
 edition = "2021"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[features]
+default = ["i3blocks"]
+# parse input in an i3blocks-like format
+i3blocks = []
+# provide an dbus interface
+dbus-interface = []
+# provide an dbus client
+dbus-client = ["dbus-interface"]
+
+[workspace]
+members = [
+    "dbus-client"
+]
 
 [dependencies]
 tokio = { version = "1", features = [ "macros", "rt", "time", "sync" ] }
