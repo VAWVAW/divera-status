@@ -14,7 +14,7 @@ pub struct Connection {
     client: Client,
     server: String,
     token: String,
-    debug: bool
+    debug: bool,
 }
 
 impl Connection {

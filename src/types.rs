@@ -27,9 +27,28 @@ pub struct Arguments {
     #[arg(long, default_value = "https://app.divera247.com")]
     pub(crate) server: String,
 
+    /// statuses to be displayed (ids, comma separated)
+    #[arg(short, long)]
+    pub(crate) shown_statuses: String,
+
+    /// order of statuses for quick change (ids, comma separated)
+    #[arg(short = 'o', long)]
+    pub(crate) status_order: String,
+
+    /// format for updates to stdout, possible {}-values are: full_text, short_text, status_name, status_color, \[status_id], \[status_id]_count, \[status_id]_color
+    #[arg(
+        short,
+        long,
+        default_value = "{{\"full_text\": \"{full_text} <span color=\"#{status_color}\">@</span>\", \"short_text\": \"{short_text}\"}}"
+    )]
+    pub(crate) display_format: String,
+
+    /// whether to disable pango markup with the status_color in {full_text} and {short_text}
+    #[arg(long)]
+    pub(crate) no_pango: bool,
 
     /// debug output
-    #[arg(short, long)]
+    #[arg(long)]
     pub(crate) debug: bool,
 }
 

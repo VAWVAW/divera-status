@@ -11,45 +11,45 @@ pub struct Wrapper<T> {
 #[derive(Debug, Serialize, Deserialize, Getters, Clone)]
 pub struct User {
     #[serde(rename = "stdformat_name")]
-    name: String,
+    pub(crate) name: String,
 }
 
 #[derive(Debug, Serialize, Deserialize, Getters, Clone)]
 pub struct Status {
-    name: String,
-    color_hex: String,
+    pub(crate) name: String,
+    pub(crate) color_hex: String,
 }
 
 #[derive(Debug, Serialize, Deserialize, Getters, Clone)]
 pub struct BasicMonitorStatus {
     #[serde(rename = "all")]
-    count: u32,
+    pub(crate) count: u32,
 }
 
 #[derive(Debug, Serialize, Deserialize, Getters, Clone)]
 pub struct MonitorUser {
-    id: u32,
+    pub(crate) id: u32,
 }
 
 #[derive(Debug, Serialize, Deserialize, Getters, Clone)]
 pub struct MonitorStatus {
     #[serde(rename = "all")]
-    users: Vec<MonitorUser>,
+    pub(crate) users: Vec<MonitorUser>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Getters, Clone)]
 pub struct Monitor {
     #[serde(rename = "1")]
-    basic: HashMap<String, BasicMonitorStatus>,
+    pub(crate) basic: HashMap<String, BasicMonitorStatus>,
 
     #[serde(rename = "2")]
-    complex: HashMap<String, MonitorStatus>,
+    pub(crate) complex: HashMap<String, MonitorStatus>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Getters, Clone)]
 pub struct UserStatus {
     #[serde(rename(serialize = "id"))]
-    status_id: u32,
+    pub(crate) status_id: u32,
 }
 
 impl UserStatus {

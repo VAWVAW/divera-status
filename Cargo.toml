@@ -4,13 +4,10 @@ version = "0.2.0"
 edition = "2021"
 
 [features]
-default = ["i3blocks"]
 # parse input in an i3blocks-like format
 i3blocks = []
 # provide an dbus interface
 dbus-interface = []
-# provide an dbus client
-dbus-client = ["dbus-interface"]
 
 [workspace]
 members = [
@@ -22,6 +19,7 @@ tokio = { version = "1", features = [ "macros", "rt", "time", "sync" ] }
 serde = { version = "1.0", features = [ "derive" ] }
 serde_json = "1"
 reqwest = { version = "0.11", features = [ "blocking", "json" ] }
-serde_with = "2.3"
+serde_with = "3"
 derive-getters = "0.2"
 clap = { version = "4", features = [ "derive" ] }
+strfmt = "0.2"
