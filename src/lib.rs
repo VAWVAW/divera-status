@@ -1,7 +1,9 @@
 mod api;
 mod api_types;
+mod dbus_interface;
 mod i3blocks;
 mod types;
+mod divera_status1;
 
 use crate::api::{Connection, StatusMap, UserMap};
 use crate::api_types::{Monitor, UserStatus};
@@ -122,7 +124,7 @@ async fn wait_update(rx: &mut Receiver<Update>) -> Update {
     rx.recv().await.expect("channel closed by reading thread")
 }
 
-pub async fn run(args: Arguments, token: String) -> Result<(), reqwest::Error> {
+pub async fn start(args: Arguments, token: String) -> Result<(), reqwest::Error> {
     // parse args
     let status_order: Vec<u32> = args
         .status_order
@@ -133,7 +135,7 @@ pub async fn run(args: Arguments, token: String) -> Result<(), reqwest::Error> {
         println!("debug: using order: {:?}", status_order);
     }
 
-    // setup connection
+    // set up connection
     let connection = Connection::new(
         Client::builder().https_only(true).build()?,
         args.server().clone(),
@@ -141,12 +143,15 @@ pub async fn run(args: Arguments, token: String) -> Result<(), reqwest::Error> {
         args.debug,
     );
 
-    // setup event producers
+    // set up event producers
     #[allow(unused)]
     let (tx, mut rx): (Sender<Update>, Receiver<Update>) = mpsc::channel(64);
 
     #[cfg(feature = "i3blocks")]
     i3blocks::setup(tx.clone(), args.debug);
+
+    #[cfg(feature = "dbus-interface")]
+    dbus_interface::setup(tx.clone(), args.debug).await;
 
     // request initial data
     let (user_map, status_map) = connection.pull_static().await?;
@@ -220,19 +225,7 @@ mod test {
     use crate::{format_output, Arguments};
     use std::collections::HashMap;
 
-    #[test]
-    fn test_i3blocks_format() {
-        let args = Arguments {
-            token: None,
-            token_file: None,
-            interval: 0,
-            server: "".to_string(),
-            shown_statuses: "1,3,2".to_string(),
-            status_order: "4,1,2,3".to_string(),
-            display_format: "{{\"full_text\": \"{full_text} <span color=\"#{status_color}\">@</span>\", \"short_text\": \"{short_text}\"}}".to_string(),
-            no_pango: false,
-            debug: false,
-        };
+    fn get_example_data() -> (Monitor, UserStatus, UserMap, StatusMap) {
         let mut monitor = Monitor {
             basic: HashMap::new(),
             complex: HashMap::new(),
@@ -329,6 +322,24 @@ mod test {
                 users: vec![MonitorUser { id: 8 }],
             },
         );
+
+        (monitor, user_status, user_map, status_map)
+    }
+
+    #[test]
+    fn test_i3blocks_format() {
+        let args = Arguments {
+            token: None,
+            token_file: None,
+            interval: 0,
+            server: "".to_string(),
+            shown_statuses: "1,3,2".to_string(),
+            status_order: "4,1,2,3".to_string(),
+            display_format: "{{\"full_text\": \"{full_text} <span color=\"#{status_color}\">@</span>\", \"short_text\": \"{short_text}\"}}".to_string(),
+            no_pango: false,
+            debug: false,
+        };
+        let (monitor, user_status, user_map, status_map) = get_example_data();
 
         let output = format_output(&args, &monitor, &user_status, &user_map, &status_map);
 

@@ -1,0 +1,11 @@
+<!DOCTYPE node PUBLIC "-//freedesktop//DTD D-BUS Object Introspection 1.0//EN"
+ "http://www.freedesktop.org/standards/dbus/1.0/introspect.dtd">
+<node name="/de/nlih/DiveraStatus1">
+	<interface name="de.nlih.DiveraStatus1.Monitor">
+		<method name="Update"/>
+	</interface>
+	<interface name="de.nlih.DiveraStatus1.Status">
+		<method name="Next"/>
+		<method name="Previous"/>
+	</interface>
+</node>
