@@ -81,23 +81,46 @@ fn format_output(
                 continue;
             }
 
-            full_statuses.push(
-                strfmt(
-                    &format!("<span color=\"#{{{0}_color}}\">{{{0}}}</span>", status),
-                    &data,
-                )
-                .unwrap(),
-            );
-            short_statuses.push(
-                strfmt(
-                    &format!(
-                        "<span color=\"#{{{0}_color}}\">{{{0}_count}}</span>",
-                        status
-                    ),
-                    &data,
-                )
-                .unwrap(),
-            );
+            if args.escape_quotes {
+                full_statuses.push(
+                    strfmt(
+                        &format!("<span color=\\\"#{{{0}_color}}\\\">{{{0}}}</span>", status),
+                        &data,
+                    )
+                        .unwrap(),
+                );
+                short_statuses.push(
+                    strfmt(
+                        &format!(
+                            "<span color=\\\"#{{{0}_color}}\\\">{{{0}_count}}</span>",
+                            status
+                        ),
+                        &data,
+                    )
+                        .unwrap(),
+                );
+
+            }
+            else {
+                full_statuses.push(
+                    strfmt(
+                        &format!("<span color=\"#{{{0}_color}}\">{{{0}}}</span>", status),
+                        &data,
+                    )
+                        .unwrap(),
+                );
+                short_statuses.push(
+                    strfmt(
+                        &format!(
+                            "<span color=\"#{{{0}_color}}\">{{{0}_count}}</span>",
+                            status
+                        ),
+                        &data,
+                    )
+                        .unwrap(),
+                );
+
+            }
         }
 
         data.insert("full_text".to_string(), full_statuses.join(" - "));
@@ -336,6 +359,7 @@ mod test {
             shown_statuses: "1,3,2".to_string(),
             status_order: "4,1,2,3".to_string(),
             display_format: "{{\"full_text\": \"{full_text} <span color=\"#{status_color}\">@</span>\", \"short_text\": \"{short_text}\"}}".to_string(),
+            escape_quotes: true,
             no_pango: false,
             debug: false,
         };

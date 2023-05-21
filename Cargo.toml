@@ -1,18 +1,21 @@
+[workspace]
+package.version = "0.2.0"
+package.authors = [ "vawvaw" ]
+members = [
+    "dbus-client"
+]
+
 [package]
 name = "divera-status"
 version = "0.2.0"
 edition = "2021"
+authors.workspace = true
 
 [features]
 # parse input in an i3blocks-like format
 i3blocks = []
 # provide an dbus interface
 dbus-interface = [ "dbus", "dbus-crossroads", "dbus-tokio" ]
-
-[workspace]
-members = [
-    "dbus-client"
-]
 
 [dependencies]
 tokio = { version = "1", features = [ "macros", "rt", "time", "sync" ] }

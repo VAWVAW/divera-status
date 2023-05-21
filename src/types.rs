@@ -3,8 +3,7 @@ use std::io;
 use std::io::BufRead;
 use std::path::PathBuf;
 
-use clap::ArgGroup;
-use clap::Parser;
+use clap::{ArgGroup, Parser};
 use derive_getters::Getters;
 
 #[derive(Parser, Getters)]
@@ -43,7 +42,11 @@ pub struct Arguments {
     )]
     pub(crate) display_format: String,
 
-    /// whether to disable pango markup with the status_color in {full_text} and {short_text}
+    /// escape double quotes in {full_text} and {short_text}
+    #[arg(short, long)]
+    pub(crate) escape_quotes: bool,
+
+    /// disable pango markup with the status_color in {full_text} and {short_text}
     #[arg(long)]
     pub(crate) no_pango: bool,
 

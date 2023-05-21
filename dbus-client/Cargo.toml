@@ -1,8 +1,11 @@
 [package]
-name = "dbus-client"
-version = "0.1.0"
+name = "divera-dbus-client"
+version.workspace = true
+authors.workspace = true
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+dbus = "0.9"
+clap = { version = "4", features = [ "derive" ] }
